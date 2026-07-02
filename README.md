@@ -451,8 +451,10 @@ TOTAL        3840 | 7788  7158  7631  4744 |  +8.1%  +2.0% +39.1%
 | --- | --- |
 | `examples/wan_integration.py` | End-to-end Wan-style integration: construct a tiny model with `LiteLinear` FFNs, run a forward on CUDA, and (with `--checkpoint`) load a converted snapshot. |
 | `examples/bench_ffn.py` | Kernel microbench: `nn.Linear` vs PyTorch FP8 path vs `lite_linear._cuda.fused_forward` on the captured LTX-Video FFN shape set. |
-| `examples/bench_lrdelta.py` | Module-level bench: `nn.Linear` vs `LiteLinear` (end-to-end Python path) vs the raw `fused_forward` kernel. Optional `--include-te` for TE comparison. |
-| `examples/bench_lrdelta_amd.py` | Same as `bench_lrdelta.py` but for the ROCm `lite_linear._rocm` path. |
+| `examples/bench_litelinear.py` | Module-level bench: `nn.Linear` vs `LiteLinear` (end-to-end Python path) vs the raw `fused_forward` kernel. Optional `--include-te` for TE comparison. |
+| `examples/bench_litelinear_amd.py` | Same as `bench_litelinear.py` but for the ROCm `lite_linear._rocm` path. |
+
+The older `examples/bench_lrdelta*.py` names remain as compatibility wrappers.
 
 ## Additional docs
 

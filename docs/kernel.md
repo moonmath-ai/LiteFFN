@@ -133,9 +133,11 @@ Useful entry points:
 - `examples/bench_ffn.py` — kernel microbench (calls
   `lite_linear._cuda.fused_forward` directly) on the captured LTX-Video
   FFN shape set.
-- `examples/bench_lrdelta.py` — module-level bench (`LiteLinear` vs
+- `examples/bench_litelinear.py` — module-level bench (`LiteLinear` vs
   `nn.Linear`, optional TE comparison).
-- `examples/bench_lrdelta_amd.py` — same for the ROCm path.
+- `examples/bench_litelinear_amd.py` — same for the ROCm path.
+
+The older `examples/bench_lrdelta*.py` names remain as compatibility wrappers.
 
 ## Known caveats
 
