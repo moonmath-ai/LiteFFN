@@ -457,4 +457,7 @@ TOTAL        3840 | 7788  7158  7631  4744 |  +8.1%  +2.0% +39.1%
 ## Additional docs
 
 - `docs/integration_guide.md`: end-to-end Wan / LTX integration patterns.
-- `docs/kernel.md`: runtime compatibility notes and benchmarking.
+- `docs/wheel_compatibility.md`: published wheel matrix and install
+  compatibility boundaries.
+- `docs/kernel.md`: wheel payload policy, runtime compatibility notes,
+  validation, benchmarking.

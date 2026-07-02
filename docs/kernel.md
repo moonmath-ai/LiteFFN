@@ -15,6 +15,9 @@ Use the packaged wheels that match the target Python ABI and PyTorch backend.
 - Rebuild wheels when changing Python, platform, CUDA/PyTorch
   compatibility, or deployment hardware assumptions.
 
+See `docs/wheel_compatibility.md` for the current public wheel matrix and
+install compatibility boundaries.
+
 ### Wheel filename convention
 
 Wheel filenames follow the standard format
