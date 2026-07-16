@@ -64,6 +64,70 @@ default `copy_` would silently cast between the two variants; the
 mismatch and points at `lite-linear convert --fp8-dtype {e4m3fn,e4m3fnuz}`
 to produce a checkpoint with the correct variant.
 
+## Autotune Cache And Prewarm
+
+The accelerated path may autotune the first call for each new `(M, N, K)`
+shape. For services, run representative shapes once during startup so the
+first user request does not pay that setup cost.
+
+Autotune picks are stored in a local cache file. The default path is tagged by
+backend and GPU architecture:
+
+- CUDA: `~/.cache/lite-linear/autotune_cuda_<smXY>.cache`
+- ROCm: `~/.cache/lite-linear/autotune_rocm_<gfx>.cache`
+
+Set `LITELINEAR_AUTOTUNE_CACHE_FILE` to choose an explicit cache path. If you
+want cache paths to include PyTorch version, LiteLinear version, driver, or
+shape-set identity, encode that in this explicit path; the default filename
+only includes backend and GPU architecture.
+
+Example startup pattern:
+
+```bash
+export LITELINEAR_AUTOTUNE_CACHE_FILE=/var/cache/lite-linear/ltx2-cu128-sm90-v0.3.0.cache
+python serve.py
+```
+
+Set the cache path before importing the host model or `lite_linear`, then run
+representative requests during service startup:
+
+```python
+import os
+import torch
+
+os.environ.setdefault(
+    "LITELINEAR_AUTOTUNE_CACHE_FILE",
+    "/var/cache/lite-linear/ltx2-cu128-sm90-v0.3.0.cache",
+)
+
+from my_service import load_pipeline, representative_requests
+
+pipe = load_pipeline().to("cuda")
+pipe.eval()
+
+with torch.inference_mode():
+    for request in representative_requests():
+        pipe(**request)
+
+# Mark the service ready only after prewarm completes.
+```
+
+For benchmarks, use the same idea with the expected tensor shapes: set the
+cache path, run warmup forwards for each `(M, N, K)` shape you care about, then
+collect timings in a separate pass.
+
+Do not treat autotune caches as portable release artifacts. Generate or refresh
+them in the target runtime environment, especially after PyTorch, driver,
+backend, or hardware changes. To force a refresh, run once with:
+
+```bash
+export LITELINEAR_AUTOTUNE_RESET=1
+```
+
+New autotune picks are still persisted while reset is enabled. Unseen runtime
+shapes can still pay first-touch autotune, so prewarm the shapes your service
+actually serves.
+
 ## Benchmarking
 
 For stable timing comparisons:
