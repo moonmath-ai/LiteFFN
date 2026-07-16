@@ -1,8 +1,6 @@
 # Runtime Notes
 
-This release intentionally omits native runtime internals from the public
-documentation. Use the packaged wheels for deployment and the build
-validation scripts to confirm the wheel payload policy.
+Use the packaged wheels that match the target Python ABI and PyTorch backend.
 
 ## Compatibility
 
@@ -10,6 +8,10 @@ validation scripts to confirm the wheel payload policy.
 - Use a CUDA- or ROCm-enabled PyTorch environment whose backend matches the
   wheel build (`+cu128` for CUDA 12.8, `+rocm72` for ROCm 7.2; see the
   wheel's `lite_linear-*.dist-info/METADATA` for package requirements).
+- Published wheels for 0.3.0 are Linux x86_64 `cp310` and `cp312` only:
+  CUDA 12.8 (`+cu128`) and the official AMD target ROCm 7.2 (`+rocm72`).
+- ROCm 6.3 and 7.0 are not official support targets for this release; use the
+  `+rocm72` wheels with a matching PyTorch 2.11.0+rocm7.2 environment.
 - Rebuild wheels when changing Python, platform, CUDA/PyTorch
   compatibility, or deployment hardware assumptions.
 
@@ -42,35 +44,16 @@ For example:
 
 - `lite_linear-0.3.0+cu128-cp310-cp310-linux_x86_64.whl` — 0.3.0 release,
   built for CUDA 12.8 torch wheels, Python 3.10.
-- `lite_linear-0.2.0+cu128-cp312-cp312-linux_x86_64.whl` — 0.2.0 release,
+- `lite_linear-0.3.0+cu128-cp312-cp312-linux_x86_64.whl` — 0.3.0 release,
   built for CUDA 12.8 torch wheels, Python 3.12.
 - `lite_linear-0.3.0+rocm72-cp310-cp310-linux_x86_64.whl` — 0.3.0 release,
-  built for ROCm 7.2 torch wheels, Python 3.10.
+  built for PyTorch 2.11.0+rocm7.2, Python 3.10.
 
 The PEP 440 local label (`+cu128`, `+rocm72`) identifies the backend build.
 When installing from release assets or file paths, choose the wheel whose
 local label matches the PyTorch backend in the target environment.
-
-## Validation
-
-The release wheel validation checks that:
-
-- Required runtime modules are present (`_cuda` for NVIDIA, `_rocm` for AMD).
-- Source files for the native runtime are not included in the wheel
-  payload (`lite_linear/csrc/`, `lite_linear/csrc_rocm/`, and any
-  `.cu` / `.cpp` / `.cuh` / `.h` under `lite_linear/`).
-- The public Python entrypoints needed by integration flows remain
-  available (`lite_linear.LiteLinear`, `lite_linear.calibration`,
-  `lite_linear.cli`, `lite_linear.converter`, `lite_linear.decompose`,
-  `lite_linear.inspect`, `lite_linear.manifest`).
-
-Run validation with:
-
-```bash
-python scripts/validate_wheel_contents.py --wheel dist/<wheel>.whl
-```
-
-(from the private build repo).
+The wheel does not install PyTorch for you, and the local label is not a
+separate PyPI distribution.
 
 ## Cross-platform FP8 variants
 
@@ -109,4 +92,5 @@ Useful entry points:
   the upstream `lite_linear/linear.py` docstring.
 - LiteLinear is inference-only: the autograd `Function` wrapping the
   fused kernel raises on `.backward()`.
-- LiteLinear requires CUDA inputs; running `forward` on CPU raises.
+- LiteLinear requires GPU inputs; running `forward` on CPU raises. PyTorch uses
+  `cuda` APIs and device strings for ROCm builds too.

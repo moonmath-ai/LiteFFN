@@ -55,8 +55,8 @@ class WanLikeBlock(nn.Module):
 
     def __init__(self, dim: int, ffn_dim: int) -> None:
         super().__init__()
-        # `bias=True` matches Wan's default; LiteLinear requires CUDA
-        # weights, so `.to("cuda")` is the host model's job.
+        # `bias=True` matches Wan's default; LiteLinear requires GPU weights.
+        # PyTorch uses `.to("cuda")` for both NVIDIA CUDA and AMD ROCm builds.
         self.ffn = nn.Sequential(
             LiteLinear(dim, ffn_dim, bias=True),
             nn.GELU(approximate="tanh"),
@@ -105,7 +105,7 @@ def main() -> None:
         default=None,
         help="Path to a `lite-linear convert`-produced checkpoint directory "
         "(or single `.safetensors` file). If omitted, the script just "
-        "constructs the model and runs a random forward on CUDA.",
+        "constructs the model and runs a random GPU forward.",
     )
     parser.add_argument("--batch", type=int, default=2)
     parser.add_argument("--seq", type=int, default=128)
@@ -115,7 +115,7 @@ def main() -> None:
     import torch
 
     if not torch.cuda.is_available():
-        raise SystemExit("LiteLinear requires a CUDA device.")
+        raise SystemExit("LiteLinear requires a GPU device.")
 
     model = build_model(dim=args.dim).to("cuda", dtype=torch.bfloat16)
     model.eval()

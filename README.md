@@ -199,13 +199,15 @@ Full LTX 0.9.8 summary: [metrics_summary.md](docs/ltx0.9.8_metrics/metrics_summa
 Pre-built NVIDIA CUDA 12.8 and AMD ROCm 7.2 wheels for LiteLinear 0.3.0
 live in `install/`. They include the latest surface: `LiteLinear`,
 `lite-linear convert`, R-matrix `Calibrator`, and `LiteLinear.from_dense`.
+LiteLinear is not published on PyPI; install from GitHub Releases or from the
+repo's `install/` directory.
 
 | Wheel | Python | Platform | Built against | SHA-256 |
 | --- | --- | --- | --- | --- |
-| `install/lite_linear-0.3.0+cu128-cp310-cp310-linux_x86_64.whl` | 3.10 | NVIDIA (CUDA 12.8 runtime) | torch 2.11 cu128 | `3264c0426da7b79914371098902a70b1742e9f67e15fc9e07360608cb9bdc239` |
-| `install/lite_linear-0.3.0+cu128-cp312-cp312-linux_x86_64.whl` | 3.12 | NVIDIA (CUDA 12.8 runtime) | torch 2.11 cu128 | `cef00e40e322594f7dd1e6fc4a17588758da323d8e6e162be49bdcd14250b26b` |
-| `install/lite_linear-0.3.0+rocm72-cp310-cp310-linux_x86_64.whl` | 3.10 | AMD (ROCm 7.2 runtime) | torch ROCm 7.2 | `b38967669b1caa96d7a2afde9e3bd30f6ef2be3a7903df79ede5f221a3275c27` |
-| `install/lite_linear-0.3.0+rocm72-cp312-cp312-linux_x86_64.whl` | 3.12 | AMD (ROCm 7.2 runtime) | torch ROCm 7.2 | `32f5ac5f57309605562b8d651d88480050d9be07b201e3fac038266d0c6c94a7` |
+| `install/lite_linear-0.3.0+cu128-cp310-cp310-linux_x86_64.whl` | 3.10 | NVIDIA (CUDA 12.8 runtime) | PyTorch 2.11.x+cu128 | `3264c0426da7b79914371098902a70b1742e9f67e15fc9e07360608cb9bdc239` |
+| `install/lite_linear-0.3.0+cu128-cp312-cp312-linux_x86_64.whl` | 3.12 | NVIDIA (CUDA 12.8 runtime) | PyTorch 2.11.x+cu128 | `cef00e40e322594f7dd1e6fc4a17588758da323d8e6e162be49bdcd14250b26b` |
+| `install/lite_linear-0.3.0+rocm72-cp310-cp310-linux_x86_64.whl` | 3.10 | AMD (ROCm 7.2 runtime) | PyTorch 2.11.0+rocm7.2 | `b38967669b1caa96d7a2afde9e3bd30f6ef2be3a7903df79ede5f221a3275c27` |
+| `install/lite_linear-0.3.0+rocm72-cp312-cp312-linux_x86_64.whl` | 3.12 | AMD (ROCm 7.2 runtime) | PyTorch 2.11.0+rocm7.2 | `32f5ac5f57309605562b8d651d88480050d9be07b201e3fac038266d0c6c94a7` |
 
 Wheel filenames follow the standard format
 ([PEP 491](https://peps.python.org/pep-0491/#file-name-convention)):
@@ -220,12 +222,14 @@ LiteLinear does not use the optional build tag, so:
 lite_linear-{version}+{flavor}-cp{py}-cp{py}-{platform}.whl
 ```
 
-The local version label (`+cu128` or `+rocm72`) identifies the backend build.
-Install the wheel that matches the Python ABI and the PyTorch backend already
-present in the target environment.
+The local version label (`+cu128` or `+rocm72`) identifies the backend build;
+it is not a separate PyPI distribution. Install the wheel that matches the
+Python ABI and the PyTorch backend already present in the target environment.
+The official AMD target for this release is ROCm 7.2; ROCm 6.3 and 7.0 are
+not supported release targets.
 
 Install a wheel into a Python environment that already has the matching
-`torch` build:
+`torch` build. The wheel does not install PyTorch for you.
 
 ```bash
 # Example: install the latest cp312 wheel into a CUDA-enabled venv.
@@ -242,22 +246,9 @@ sha256sum install/lite_linear-0.3.0+cu128-cp312-cp312-linux_x86_64.whl
 # compare to: cef00e40e322594f7dd1e6fc4a17588758da323d8e6e162be49bdcd14250b26b
 ```
 
-The wheel ships the compiled `_cuda` extension and the obfuscated Python
-package; no source, no CUDA toolkit, no `lite_linear/csrc/` is required on
-the host.
-
-### Wheel payload policy
-
-The wheel deliberately does not contain:
-
-- `lite_linear/csrc/*` (CUDA / C++ kernel sources)
-- `lite_linear/csrc_rocm/*` (HIP fallback sources)
-- the unobfuscated `lite_linear/linear.py` (the fused forward is in the
-  Cython-compiled `.so`; only the pure-PyTorch `linear.py` emulation path
-  remains in source form)
-
-Run `scripts/validate_wheel_contents.py --wheel <wheel>` (from the private
-build repo) to confirm a wheel satisfies the policy.
+Published wheels for this release are Linux x86_64 `cp310` and `cp312` only.
+CPU-only inference, macOS, Windows, CUDA 12.9/13.0, and ROCm 6.3/7.0 are not
+published wheel targets for 0.3.0.
 
 ## Usage
 
@@ -274,7 +265,8 @@ layer = LiteLinear(in_features=4096, out_features=16384, bias=True, rank=64)
 state = torch.load("path/to/converted.safetensors")  # or safetensors.torch.load_model
 layer.load_state_dict(state)
 
-# 3. Move to CUDA and run (LiteLinear is GPU-only).
+# 3. Move to a GPU and run. PyTorch uses "cuda" device strings on both
+#    NVIDIA CUDA and AMD ROCm builds.
 layer = layer.to("cuda", dtype=torch.bfloat16)
 x = torch.randn(8, 4096, device="cuda", dtype=torch.bfloat16)
 y = layer(x)  # (8, 16384), bfloat16
@@ -465,5 +457,4 @@ TOTAL        3840 | 7788  7158  7631  4744 |  +8.1%  +2.0% +39.1%
 ## Additional docs
 
 - `docs/integration_guide.md`: end-to-end Wan / LTX integration patterns.
-- `docs/kernel.md`: wheel payload policy, runtime compatibility notes,
-  validation, benchmarking.
+- `docs/kernel.md`: runtime compatibility notes and benchmarking.

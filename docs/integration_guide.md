@@ -271,6 +271,3 @@ If you're starting from a pre-0.3 checkpoint that still has
 `<prefix>.weight` keys (not the factor quad), run it through
 `lite-linear convert` to produce a 0.3-compatible snapshot.
 
-## Validation
-
-For wheel payload validation, see `docs/kernel.md`.
