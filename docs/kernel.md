@@ -81,36 +81,25 @@ want cache paths to include PyTorch version, LiteLinear version, driver, or
 shape-set identity, encode that in this explicit path; the default filename
 only includes backend and GPU architecture.
 
-Example startup pattern:
+Example startup pattern using the repo helper:
+
+```bash
+python examples/prewarm_litelinear.py \
+    --shapes-json examples/manifests/ltx2_5s_1536x1024.json \
+    --cache-file /var/cache/lite-linear/ltx2-cu128-sm90-v0.3.0.cache \
+    --passes 1 \
+    --output-json /tmp/litelinear_prewarm_report.json
+```
+
+Then start the service with the same cache path:
 
 ```bash
 export LITELINEAR_AUTOTUNE_CACHE_FILE=/var/cache/lite-linear/ltx2-cu128-sm90-v0.3.0.cache
 python serve.py
 ```
 
-Set the cache path before importing the host model or `lite_linear`, then run
-representative requests during service startup:
-
-```python
-import os
-import torch
-
-os.environ.setdefault(
-    "LITELINEAR_AUTOTUNE_CACHE_FILE",
-    "/var/cache/lite-linear/ltx2-cu128-sm90-v0.3.0.cache",
-)
-
-from my_service import load_pipeline, representative_requests
-
-pipe = load_pipeline().to("cuda")
-pipe.eval()
-
-with torch.inference_mode():
-    for request in representative_requests():
-        pipe(**request)
-
-# Mark the service ready only after prewarm completes.
-```
+Use `--dry-run` to validate the manifest and command line without importing
+PyTorch or running GPU work.
 
 For benchmarks, use the same idea with the expected tensor shapes: set the
 cache path, run warmup forwards for each `(M, N, K)` shape you care about, then
