@@ -196,14 +196,16 @@ Full LTX 0.9.8 summary: [metrics_summary.md](docs/ltx0.9.8_metrics/metrics_summa
 
 ## Installation
 
-Pre-built NVIDIA CUDA 12.8 wheels for LiteLinear 0.3.0 live in `install/`.
-They include the latest surface: `LiteLinear`, `lite-linear convert`,
-R-matrix `Calibrator`, and `LiteLinear.from_dense`.
+Pre-built NVIDIA CUDA 12.8 and AMD ROCm 7.2 wheels for LiteLinear 0.3.0
+live in `install/`. They include the latest surface: `LiteLinear`,
+`lite-linear convert`, R-matrix `Calibrator`, and `LiteLinear.from_dense`.
 
 | Wheel | Python | Platform | Built against | SHA-256 |
 | --- | --- | --- | --- | --- |
-| `install/lite_linear-0.3.0+cu128-cp310-cp310-linux_x86_64.whl` | 3.10 | NVIDIA (CUDA 12.8 runtime) | torch 2.11 cu128 | `17cda3252588849bd1a7dc6026ecb4a35a75f3970702397bcc662d7576109b9a` |
-| `install/lite_linear-0.3.0+cu128-cp312-cp312-linux_x86_64.whl` | 3.12 | NVIDIA (CUDA 12.8 runtime) | torch 2.11 cu128 | `b8ed3ec4abe2f73851ed6bbec145e683497bef9711d773db558404cfda12071e` |
+| `install/lite_linear-0.3.0+cu128-cp310-cp310-linux_x86_64.whl` | 3.10 | NVIDIA (CUDA 12.8 runtime) | torch 2.11 cu128 | `3264c0426da7b79914371098902a70b1742e9f67e15fc9e07360608cb9bdc239` |
+| `install/lite_linear-0.3.0+cu128-cp312-cp312-linux_x86_64.whl` | 3.12 | NVIDIA (CUDA 12.8 runtime) | torch 2.11 cu128 | `cef00e40e322594f7dd1e6fc4a17588758da323d8e6e162be49bdcd14250b26b` |
+| `install/lite_linear-0.3.0+rocm72-cp310-cp310-linux_x86_64.whl` | 3.10 | AMD (ROCm 7.2 runtime) | torch ROCm 7.2 | `b38967669b1caa96d7a2afde9e3bd30f6ef2be3a7903df79ede5f221a3275c27` |
+| `install/lite_linear-0.3.0+rocm72-cp312-cp312-linux_x86_64.whl` | 3.12 | AMD (ROCm 7.2 runtime) | torch ROCm 7.2 | `32f5ac5f57309605562b8d651d88480050d9be07b201e3fac038266d0c6c94a7` |
 
 Wheel filenames follow the standard format
 ([PEP 491](https://peps.python.org/pep-0491/#file-name-convention)):
@@ -218,9 +220,9 @@ LiteLinear does not use the optional build tag, so:
 lite_linear-{version}+{flavor}-cp{py}-cp{py}-{platform}.whl
 ```
 
-The local version label (`+cu128`) is informational and is not used by pip
-for resolution; pip matches on the public version plus the Python / ABI /
-platform tags.
+The local version label (`+cu128` or `+rocm72`) identifies the backend build.
+Install the wheel that matches the Python ABI and the PyTorch backend already
+present in the target environment.
 
 Install a wheel into a Python environment that already has the matching
 `torch` build:
@@ -228,13 +230,16 @@ Install a wheel into a Python environment that already has the matching
 ```bash
 # Example: install the latest cp312 wheel into a CUDA-enabled venv.
 python -m pip install --force-reinstall --no-deps install/lite_linear-0.3.0+cu128-cp312-cp312-linux_x86_64.whl
+
+# Example: install the latest cp312 wheel into a ROCm-enabled venv.
+python -m pip install --force-reinstall --no-deps install/lite_linear-0.3.0+rocm72-cp312-cp312-linux_x86_64.whl
 ```
 
 To verify a downloaded wheel matches the SHA-256 in the table above:
 
 ```bash
 sha256sum install/lite_linear-0.3.0+cu128-cp312-cp312-linux_x86_64.whl
-# compare to: b8ed3ec4abe2f73851ed6bbec145e683497bef9711d773db558404cfda12071e
+# compare to: cef00e40e322594f7dd1e6fc4a17588758da323d8e6e162be49bdcd14250b26b
 ```
 
 The wheel ships the compiled `_cuda` extension and the obfuscated Python

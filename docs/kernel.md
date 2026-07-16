@@ -7,9 +7,9 @@ validation scripts to confirm the wheel payload policy.
 ## Compatibility
 
 - Wheels are platform-specific and must match the target Python ABI.
-- Use a CUDA-enabled PyTorch environment whose torch version matches the
-  wheel build (the 0.3.0+cu128 wheels are built against torch 2.11 cu128;
-  see `lite_linear-0.3.0+cu128.dist-info/METADATA` for the exact pin).
+- Use a CUDA- or ROCm-enabled PyTorch environment whose backend matches the
+  wheel build (`+cu128` for CUDA 12.8, `+rocm72` for ROCm 7.2; see the
+  wheel's `lite_linear-*.dist-info/METADATA` for package requirements).
 - Rebuild wheels when changing Python, platform, CUDA/PyTorch
   compatibility, or deployment hardware assumptions.
 
@@ -34,7 +34,7 @@ Where:
 | --- | --- |
 | `{distribution}` | `lite_linear` (import name `lite_linear`, distribution name `lite-linear`) |
 | `{version}` | PEP 440 version (e.g. `0.3.0`, `0.2.0`) |
-| `{flavor}` | local version label after `+` (PEP 440): `cu128` for NVIDIA, `rocm63` for AMD |
+| `{flavor}` | local version label after `+` (PEP 440): `cu128` for NVIDIA, `rocm72` for AMD |
 | `cp{py}-cp{py}` | Python tag / ABI tag — both identical for CPython ABI-tagged builds (`cp310`, `cp312`, …) |
 | `{platform}` | platform tag (`linux_x86_64` for the wheels shipped here) |
 
@@ -44,14 +44,12 @@ For example:
   built for CUDA 12.8 torch wheels, Python 3.10.
 - `lite_linear-0.2.0+cu128-cp312-cp312-linux_x86_64.whl` — 0.2.0 release,
   built for CUDA 12.8 torch wheels, Python 3.12.
-- `lite_linear-0.1.0+rocm7-cp310-cp310-linux_x86_64.whl` — 0.1.0 release,
-  built for ROCm 7 torch wheels, Python 3.10.
+- `lite_linear-0.3.0+rocm72-cp310-cp310-linux_x86_64.whl` — 0.3.0 release,
+  built for ROCm 7.2 torch wheels, Python 3.10.
 
-The PEP 440 local label (`+cu128`, `+rocm63`, `+rocm7`) is informational;
-pip does not use it for resolution. Pip matches on the public version +
-the Python / ABI / platform tags, so the CUDA wheels will be picked over
-the ROCm wheels automatically as long as the host's PyTorch build is the
-matching flavor.
+The PEP 440 local label (`+cu128`, `+rocm72`) identifies the backend build.
+When installing from release assets or file paths, choose the wheel whose
+local label matches the PyTorch backend in the target environment.
 
 ## Validation
 
