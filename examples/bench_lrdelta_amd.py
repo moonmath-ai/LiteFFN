@@ -2,8 +2,8 @@
 """AMD (ROCm) LiteLinear benchmark on FFN projection shapes.
 
 Same shape set as `bench_lrdelta.py` but only compares `nn.Linear` against
-the ROCm LiteLinear path (no CUDA, no TE). Use on an AMD ROCm box with the
-`lite_linear-0.3.0+rocm63` wheel installed.
+the ROCm LiteLinear path (no NVIDIA CUDA, no TE). Use on an AMD ROCm 7.2 box
+with the `lite_linear-0.3.0+rocm72` wheel installed.
 
 Units:
   per-shape rows: us
@@ -95,7 +95,7 @@ def main() -> int:
     if not _HAS_ROCM:
         print(
             f"[bench] lite_linear._rocm extension not loaded ({_ROCM_IMPORT_ERROR}); "
-            "make sure the `lite_linear-0.3.0+rocm63` wheel is installed."
+            "make sure the `lite_linear-0.3.0+rocm72` wheel is installed."
         )
     if not getattr(torch.version, "hip", None):
         print(

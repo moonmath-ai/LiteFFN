@@ -1,0 +1,50 @@
+[
+  {
+    "name": "ltx23_audio_ff_up",
+    "M": 126,
+    "K": 2048,
+    "N": 8192,
+    "rank": 64,
+    "note": "LTX-2.3 i2v 1536x1024 121f audio FF up projection"
+  },
+  {
+    "name": "ltx23_audio_ff_down",
+    "M": 126,
+    "K": 8192,
+    "N": 2048,
+    "rank": 64,
+    "note": "LTX-2.3 audio FF down projection"
+  },
+  {
+    "name": "ltx23_video_ff_up_s1",
+    "M": 6144,
+    "K": 4096,
+    "N": 16384,
+    "rank": 64,
+    "note": "LTX-2.3 stage-1 video FF up projection"
+  },
+  {
+    "name": "ltx23_video_ff_down_s1",
+    "M": 6144,
+    "K": 16384,
+    "N": 4096,
+    "rank": 64,
+    "note": "LTX-2.3 stage-1 video FF down projection"
+  },
+  {
+    "name": "ltx23_video_ff_up_s2",
+    "M": 24576,
+    "K": 4096,
+    "N": 16384,
+    "rank": 64,
+    "note": "LTX-2.3 stage-2 video FF up projection"
+  },
+  {
+    "name": "ltx23_video_ff_down_s2",
+    "M": 24576,
+    "K": 16384,
+    "N": 4096,
+    "rank": 64,
+    "note": "LTX-2.3 stage-2 video FF down projection"
+  }
+]
