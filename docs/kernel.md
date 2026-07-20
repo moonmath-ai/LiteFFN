@@ -15,6 +15,9 @@ Use the packaged wheels that match the target Python ABI and PyTorch backend.
 - Rebuild wheels when changing Python, platform, CUDA/PyTorch
   compatibility, or deployment hardware assumptions.
 
+See `docs/wheel_compatibility.md` for the current public wheel matrix and
+install compatibility boundaries.
+
 ### Wheel filename convention
 
 Wheel filenames follow the standard format
@@ -128,11 +131,37 @@ For stable timing comparisons:
 - Treat first-run setup costs separately from steady-state inference
   timings.
 
+### Startup prewarm for serving
+
+Long-lived services can move LiteLinear's first-touch setup out of the first
+user request for known FFN shapes. Set a persistent
+`LITELINEAR_AUTOTUNE_CACHE_FILE`, run the production shape set during startup,
+and mark the service ready only after prewarm succeeds.
+
+```bash
+python examples/prewarm_litelinear.py \
+  --shapes-json shapes.json \
+  --cache-file litelinear_autotune.cache \
+  --output-json prewarm_result.json
+```
+
+For production, keep the shape manifest and cache key tied to the runtime:
+GPU, CUDA or ROCm backend, torch, LiteLinear wheel version, dtype, rank, and
+shape set. A
+request that hits a shape missing from the manifest can still pay the
+first-touch cost on the request path.
+
+This is a startup-latency control path. It does not change rank, weights,
+decomposition, inputs, or the LiteLinear fused-forward call path, and it does
+not claim a faster steady-state kernel.
+
 Useful entry points:
 
 - `examples/bench_ffn.py` — kernel microbench (calls
   `lite_linear._cuda.fused_forward` directly) on the captured LTX-Video
   FFN shape set.
+- `examples/prewarm_litelinear.py` — startup prewarm helper for known
+  fused-forward FFN shapes.
 - `examples/bench_litelinear.py` — module-level bench (`LiteLinear` vs
   `nn.Linear`, optional TE comparison).
 - `examples/bench_litelinear_amd.py` — same for the ROCm path.
